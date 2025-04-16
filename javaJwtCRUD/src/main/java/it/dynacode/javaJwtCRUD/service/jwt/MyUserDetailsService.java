@@ -1,0 +1,32 @@
+package it.dynacode.javaJwtCRUD.service.jwt;
+
+
+import it.dynacode.javaJwtCRUD.repository.UtenteRepository;
+import it.dynacode.javaJwtCRUD.entity.UserPrincipal;
+import it.dynacode.javaJwtCRUD.entity.Utente;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class MyUserDetailsService implements UserDetailsService {
+
+    @Autowired
+    private UtenteRepository utenteRepository;
+
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Optional<Utente> user = utenteRepository.findById(email);
+        if (user.isEmpty()) {
+            System.out.println("User Not Found");
+            throw new UsernameNotFoundException("user not found");
+        }
+
+        return new UserPrincipal(user.get());
+    }
+}
