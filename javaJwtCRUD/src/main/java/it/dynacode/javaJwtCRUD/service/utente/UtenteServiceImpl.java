@@ -45,8 +45,9 @@ public class UtenteServiceImpl implements UtenteService {
     }
 
     @Override
-    public void softDelete(String theId, Timestamp deletedAt) {
+    public String softDelete(String theId, Timestamp deletedAt) {
         utenteRepository.softDelete(theId , deletedAt);
+        return "Utente cancellato con successo";
     }
 
 

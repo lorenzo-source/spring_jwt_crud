@@ -12,7 +12,7 @@ public interface UtenteService {
 
     Utente save(Utente theEmployee);
 
-    void softDelete(String theId, Timestamp deletedAt);
+    String softDelete(String theId, Timestamp deletedAt);
 
 
 }

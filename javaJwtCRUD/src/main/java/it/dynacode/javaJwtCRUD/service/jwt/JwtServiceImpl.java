@@ -7,15 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
-public class JwtServiceImpl implements JwtService{
+public class JwtServiceImpl implements JwtService {
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -26,8 +27,8 @@ public class JwtServiceImpl implements JwtService{
     @Autowired
     private UtenteRepository utenteRepository;
 
-   @Autowired
-   private UserDetailsService userDetailsService;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
@@ -38,28 +39,36 @@ public class JwtServiceImpl implements JwtService{
         return user;
     }
 
-    public String login (Utente user) {
+    public String login(Utente user) {
         Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
         if (authentication.isAuthenticated()) {
-            utenteRepository.updateLoginDate(user.getEmail(), Timestamp.from(new Date().toInstant()));
-            return jwtUtils.generateToken(user.getEmail(), JwtUtils.DEFAULT_TOKEN_TIME);
+            return  jwtUtils.init(user,utenteRepository);
         } else {
-            return "fail";
+            return "Errore nel login";
         }
     }
 
 
+    public String refresh(Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        try {
+            String username = jwtUtils.extractUserName(refreshToken);
 
-    public String refresh(Utente user) {
-        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
-        if (authentication.isAuthenticated()) {
-            String refreshedToken = jwtUtils.refreshToken(user.getEmail());
-            utenteRepository.updateRefreshToken(user.getEmail(), encoder.encode(refreshedToken));
-            return refreshedToken;
-        } else {
-            return "fail";
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            if (jwtUtils.validateToken(refreshToken, userDetails)) {
+                Optional<Utente> user = utenteRepository.findById(username);
+                if(user.isPresent()){
+                    return  jwtUtils.init(user.get(),utenteRepository);
+                }else{
+                    return "Utente non trovato";
+                }
+            } else {
+                throw new RuntimeException("Refresh token non valido");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Errore durante il refresh del token");
         }
     }
-
 
 }

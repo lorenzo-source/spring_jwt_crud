@@ -4,13 +4,15 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.Getter;
+import it.dynacode.javaJwtCRUD.entity.Utente;
+import it.dynacode.javaJwtCRUD.repository.UtenteRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,11 +26,9 @@ public class JwtUtils {
 
     private String secretkey = "";
 
-    //public static final Date DEFAULT_TOKEN_TIME = new Date(System.currentTimeMillis()+ + 10 * 1000);
+    public static final long DEFAULT_TOKEN_TIME = 15 * 60 * 1000;
 
-    public static final Date DEFAULT_TOKEN_TIME = new Date(System.currentTimeMillis()+ 15 * 60 * 1000);
-
-    public static final Date REFRESH_TOKEN_TIME = new Date(System.currentTimeMillis() + 7L * 24 * 60 * 60 * 1000);
+    public static final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000;
 
     public JwtUtils() {
 
@@ -41,14 +41,26 @@ public class JwtUtils {
         }
     }
 
-    public String generateToken(String username, Date tokenTime) {
+    public String init(Utente user, UtenteRepository utenteRepository){
+        utenteRepository.updateLoginDate(user.getEmail(), Timestamp.from(new Date().toInstant()));
+
+        String token = this.generateToken(user.getEmail(), JwtUtils.DEFAULT_TOKEN_TIME);
+
+        String refreshToken = this.generateToken(user.getEmail(), JwtUtils.REFRESH_TOKEN_TIME);
+
+        utenteRepository.updateRefreshToken(user.getEmail(), refreshToken);
+
+        return  "Token: " + token + " \n Refresh Token: " + refreshToken;
+    }
+
+    public String generateToken(String username, long tokenTime) {
         Map<String, Object> claims = new HashMap<>();
         return Jwts.builder()
                 .claims()
                 .add(claims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(tokenTime)
+                .expiration(new Date(System.currentTimeMillis() + tokenTime))
                 .and()
                 .signWith(getKey())
                 .compact();
@@ -62,7 +74,6 @@ public class JwtUtils {
     }
 
     public String extractUserName(String token) {
-        // extract the username from jwt token
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -91,10 +102,5 @@ public class JwtUtils {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-
-    public String refreshToken(String email) {
-        return this.generateToken(email,JwtUtils.REFRESH_TOKEN_TIME);
-    }
-
 
 }
