@@ -6,14 +6,12 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import it.dynacode.javaJwtCRUD.entity.Utente;
 import it.dynacode.javaJwtCRUD.repository.UtenteRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,23 +21,14 @@ import java.util.function.Function;
 @Component
 public class JwtUtils {
 
-
-    private String secretkey = "";
+    @Value("${secretKey}")
+    private String secretKey = "";
 
     public static final long DEFAULT_TOKEN_TIME = 15 * 60 * 1000;
 
     public static final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000;
 
-    public JwtUtils() {
-
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
-            SecretKey sk = keyGen.generateKey();
-            secretkey = Base64.getEncoder().encodeToString(sk.getEncoded());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    public JwtUtils() {}
 
     public String init(Utente user, UtenteRepository utenteRepository){
         utenteRepository.updateLoginDate(user.getEmail(), Timestamp.from(new Date().toInstant()));
@@ -69,7 +58,7 @@ public class JwtUtils {
 
 
     private SecretKey getKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretkey);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

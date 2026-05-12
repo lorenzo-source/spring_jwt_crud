@@ -49,6 +49,8 @@ Controller  →  Service  →  Repository  →  Database
 
 **Dual token response** — the login endpoint returns both access token and refresh token in a single response, following standard OAuth2-inspired patterns.
 
+**Secret key externalized** — the JWT signing key is loaded from `application.properties` via `@Value`, not hardcoded. This means the key is stable across restarts and can be managed per environment without changing code.
+
 ---
 
 ## Stack
@@ -108,12 +110,20 @@ cd spring_jwt_crud
 mysql -u root -p < src/main/java/sqlScripts.sql
 ```
 
-3. Configure your database connection in `application.properties`
+3. Copy the example properties file and configure your environment
+```bash
+cp application.properties.example javaJwtCRUD/src/main/resources/application.properties
+```
+
+Then edit `application.properties` with your values:
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/your_db
 spring.datasource.username=your_username
 spring.datasource.password=your_password
+secretKey=your_base64_encoded_secret_key
 ```
+
+> **Note:** `application.properties` is in `.gitignore` and never committed. Only `application.properties.example` is tracked. Never commit secret keys to version control.
 
 4. Run the application
 ```bash
@@ -138,12 +148,11 @@ http://localhost:8080/swagger-ui.html
 
 ## What I would improve next
 
-- Move JWT secret key to environment variable
 - Add input validation with `@Valid` and proper error messages
 - Add DTOs to separate internal entity from API response
 - Add unit tests for JWT logic and integration tests for the auth flow
 - Containerize with Docker
-- Add Angular frontend
+- Add Angular frontend connected to this backend
 
 ---
 
