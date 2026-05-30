@@ -33,16 +33,30 @@ public class JwtServiceImpl implements JwtService {
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
+    //TODO CHECK IF THE USER IS ALREADY REGISTERED
     public Utente register(Utente user) {
         user.setPassword(encoder.encode(user.getPassword()));
         utenteRepository.save(user);
         return user;
     }
 
+//    public String login(Utente user) {
+//        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+//        if (authentication.isAuthenticated()) {
+//            return  jwtUtils.init(user,utenteRepository);
+//        } else {
+//            return "Errore nel login";
+//        }
+//    }
+
     public String login(Utente user) {
-        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+        Authentication authentication = authManager.authenticate(
+                new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
+        );
         if (authentication.isAuthenticated()) {
-            return  jwtUtils.init(user,utenteRepository);
+            Utente dbUser = utenteRepository.findByEmail(user.getEmail())
+                    .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+            return jwtUtils.init(dbUser, utenteRepository);
         } else {
             return "Errore nel login";
         }

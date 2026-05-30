@@ -5,6 +5,7 @@ import it.dynacode.javaJwtCRUD.entity.Utente;
 import it.dynacode.javaJwtCRUD.service.jwt.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,9 +40,11 @@ public class AuthController {
      * @return  http status 200 se utente e' registrato sul db http status 500 in caso di eccezione.
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Utente user) {
+    public ResponseEntity<String> login(@RequestBody Utente user) {
         try {
-            return ResponseEntity.ok(jwtService.login(user));
+            return ResponseEntity.ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body(jwtService.login(user));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login fallito");
         }

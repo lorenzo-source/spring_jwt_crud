@@ -6,11 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/api")
@@ -23,80 +21,82 @@ public class UtenteRestController {
         utenteService = theUtenteService;
     }
 
-    /**
-     * Una GET per avere la lista di tutti gli utenti non cancellati
-     */
     @GetMapping("/utenti")
     public ResponseEntity<List<?>> findAll() {
-        return ResponseEntity.ok(utenteService.findByDataCancellazioneNull());
+        List<Utente> utenti = utenteService.findByDataCancellazioneNull();
+        utenti.forEach(u -> {
+            u.setPassword(null);
+            u.setRefreshToken(null);
+        });
+        return ResponseEntity.ok(utenti);
     }
 
-    /**
-     * Una GET per avere un record della tabella utenti
-     *
-     * @param utenteId L'id dell'utente che si vuole cercare
-     * @return L'utente trovato oppure Http status 500.
-     */
+    @GetMapping("/utenti/deleted")
+    public ResponseEntity<List<?>> findDeleted() {
+        List<Utente> utenti = utenteService.findByDataCancellazioneNotNull();
+        utenti.forEach(u -> {
+            u.setPassword(null);
+            u.setRefreshToken(null);
+        });
+        return ResponseEntity.ok(utenti);
+    }
+
     @GetMapping("/utenti/{utenteId}")
     public ResponseEntity<?> getUtente(@PathVariable String utenteId) {
         try {
             Utente theUtente = utenteService.findById(utenteId);
+            if (theUtente == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Utente non trovato");
+            }
+            theUtente.setPassword(null);
+            theUtente.setRefreshToken(null);
             return ResponseEntity.ok(theUtente);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Problemi nel trovare l'utente");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Utente non trovato");
         }
     }
 
-    /**
-     * Una POST per aggiungere un nuovo record
-     *
-     * @param theUtente L'utente da censire
-     * @return Http status 200 se utente inserito. Http status 500 se si verifica un'eccezione.
-     */
     @PostMapping("/utenti")
-    public ResponseEntity<Object> addEmployee(@RequestBody Utente theUtente) {
+    public ResponseEntity<Object> addUtente(@RequestBody Utente theUtente) {
         try {
-            return ResponseEntity.ok(utenteService.save(theUtente));
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(utenteService.save(theUtente));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Problemi nel salvare l'utente");
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Email già in uso");
         }
     }
 
-    /**
-     * Una PUT per la modifica dei dati di un utente
-     *
-     * @param theUtente L'utente che si vuole modificare
-     * @return ttp status 200 se utente modificato. Http status 500 se si verifica un'eccezione.
-     */
     @PutMapping("/utenti")
-    public ResponseEntity<Object> updateEmployee(@RequestBody Utente theUtente) {
-
+    public ResponseEntity<Object> updateUtente(@RequestBody Utente theUtente) {
         try {
-            Utente utenteFound = utenteService.findById(theUtente.getEmail());
-
+            Utente utenteFound = utenteService.findById(theUtente.getId());
+            if (utenteFound == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Utente non trovato");
+            }
             return ResponseEntity.ok(utenteService.save(theUtente));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Problemi nel fare l'update dell'utente");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Problemi nel fare l'update dell'utente");
         }
-
     }
 
-    /**
-     * Una DELETE per la cancellazione dei dati di un utente
-     *
-     * @param utenteId L'id dell'utente da cancellare.
-     * @return ttp status 200 se utente viene cancellato. Http status 500 se si verifica un'eccezione.
-     */
     @DeleteMapping("/utenti/{utenteId}")
-    public ResponseEntity<?> deleteEmployee(@PathVariable String utenteId) {
+    public ResponseEntity<?> deleteUtente(@PathVariable String utenteId) {
         try {
             Utente utenteFound = utenteService.findById(utenteId);
-
-            return ResponseEntity.ok(utenteService.softDelete(utenteId, Timestamp.from(new Date().toInstant())));
+            if (utenteFound == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Utente non trovato");
+            }
+            return ResponseEntity.ok(utenteService.softDelete(utenteId,
+                    Timestamp.from(new Date().toInstant())));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Problemi nel cancellare l'utente");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Problemi nel cancellare l'utente");
         }
-
     }
-
 }
