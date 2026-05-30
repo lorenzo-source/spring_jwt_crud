@@ -10,9 +10,12 @@ public interface UtenteService {
 
     Utente findById(String theId);
 
+    Utente findByEmail(String theEmail);
+
     Utente save(Utente theEmployee);
 
     String softDelete(String theId, Timestamp deletedAt);
 
-
+    // Interface
+    List<Utente> findByDataCancellazioneNotNull();
 }

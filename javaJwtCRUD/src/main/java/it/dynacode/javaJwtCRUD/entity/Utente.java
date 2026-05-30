@@ -13,35 +13,40 @@ import java.util.Date;
 @EqualsAndHashCode
 @ToString
 @Entity
-@Table(name = "UTENTI")
+@Table(name = "utenti")
 public class Utente {
+
     @Id
-    @Column(name = "email")
-    String email;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+
+    @Column(name = "email", unique = true)
+    private String email;
 
     @Column(name = "password")
-    String password;
+    private String password;
 
     @Column(name = "nome")
-    String nome;
+    private String nome;
+
     @Column(name = "cognome")
-    String cognome;
+    private String cognome;
+
     @Column(name = "data_nascita")
-    Date dataNascita;
+    private Date dataNascita;
 
     @CreationTimestamp
     @Column(name = "data_creazione")
-    Timestamp dataCreazione;
-
+    private Timestamp dataCreazione;
 
     @Column(name = "data_ultimologin")
-    Timestamp dataUltimoLogin;
-
+    private Timestamp dataUltimoLogin;
 
     @Column(name = "data_cancellazione")
-    Timestamp dataCancellazione;
+    private Timestamp dataCancellazione;
 
     @Column(name = "refresh_token")
-    String refreshToken;
+    private String refreshToken;
 
 }

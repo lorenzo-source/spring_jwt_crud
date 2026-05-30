@@ -40,6 +40,22 @@ public class UtenteServiceImpl implements UtenteService {
     }
 
     @Override
+    public Utente findByEmail(String theEmail) {
+        Optional<Utente> result = utenteRepository.findByEmail(theEmail);
+
+        Utente theUtente;
+
+        if (result.isPresent()) {
+            theUtente = result.get();
+        }
+        else {
+            throw new RuntimeException("Utente non trovato - " + theEmail);
+        }
+
+        return theUtente;
+    }
+
+    @Override
     public Utente save(Utente theUtente) {
         return utenteRepository.save(theUtente);
     }
@@ -50,6 +66,12 @@ public class UtenteServiceImpl implements UtenteService {
         return "Utente cancellato con successo";
     }
 
+
+    // Implementation
+    @Override
+    public List<Utente> findByDataCancellazioneNotNull() {
+        return utenteRepository.findByDataCancellazioneNotNull();
+    }
 
 
 

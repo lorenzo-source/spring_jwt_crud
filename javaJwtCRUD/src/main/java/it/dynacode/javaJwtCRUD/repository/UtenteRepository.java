@@ -10,27 +10,34 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 
 public interface UtenteRepository extends JpaRepository<Utente,String>{
 
 
+    Optional<Utente> findByEmail(@Param("email") String email);
+
     List<Utente> findByDataCancellazioneNull();
 
-    @Modifying
-    @Transactional
-    @Query("UPDATE Utente u SET u.dataUltimoLogin = :dataUltimoLogin WHERE u.email = :email")
-    void updateLoginDate(@Param("email") String email, @Param("dataUltimoLogin") Timestamp dataUltimoLogin);
+    List<Utente> findByDataCancellazioneNotNull();
 
     @Modifying
     @Transactional
-    @Query("UPDATE Utente u SET u.refreshToken = :refreshToken WHERE u.email = :email")
-    void updateRefreshToken(@Param("email") String email, @Param("refreshToken") String refreshToken);
+    @Query("UPDATE Utente u SET u.dataUltimoLogin = :dataUltimoLogin WHERE u.id = :id")
+    void updateLoginDate(@Param("id") String id, @Param("dataUltimoLogin") Timestamp dataUltimoLogin);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Utente u SET u.refreshToken = :refreshToken WHERE u.id = :id")
+    void updateRefreshToken(@Param("id") String id, @Param("refreshToken") String refreshToken);
+
 
 
     @Modifying
     @Transactional
-    @Query("UPDATE Utente u SET u.dataCancellazione = :deletedAt WHERE u.email = :email")
-    void softDelete(@Param("email") String email, @Param("deletedAt") Timestamp deletedAt);
+    @Query("UPDATE Utente u SET u.dataCancellazione = :deletedAt WHERE u.id = :id")
+    void softDelete(@Param("id") String id, @Param("deletedAt") Timestamp deletedAt);
+
 
 
 }
