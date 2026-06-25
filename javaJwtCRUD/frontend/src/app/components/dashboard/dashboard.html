@@ -1,1 +1,12 @@
-<p>dashboard works!</p>
+<div class="container">
+  <div class="header">
+    <h1>Dashboard</h1>
+    <button (click)="logout()" class="btn-logout">Logout</button>
+  </div>
+  <div class="cards">
+    <div class="card" routerLink="/users">
+      <h3>Gestione Utenti</h3>
+      <p>Visualizza, modifica ed elimina utenti</p>
+    </div>
+  </div>
+</div>

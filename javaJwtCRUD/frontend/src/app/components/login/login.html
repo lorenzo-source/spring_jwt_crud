@@ -1,1 +1,16 @@
-<p>login works!</p>
+<div class="container">
+  <div class="card">
+    <h2>Login</h2>
+    <div class="form-group">
+      <input type="email" placeholder="Email" [(ngModel)]="email" class="input" />
+    </div>
+    <div class="form-group">
+      <input type="password" placeholder="Password" [(ngModel)]="password" class="input" />
+    </div>
+    <button (click)="login()" class="btn" [disabled]="loading">
+      {{ loading ? 'Caricamento...' : 'Login' }}
+    </button>
+    <p class="link">Non hai un account? <a routerLink="/register">Registrati</a></p>
+    <p class="error" *ngIf="error">{{ error }}</p>
+  </div>
+</div>

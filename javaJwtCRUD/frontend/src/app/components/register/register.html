@@ -1,1 +1,23 @@
-<p>register works!</p>
+<div class="container">
+  <div class="card">
+    <h2>Registrazione</h2>
+    <div class="form-group">
+      <input type="text" placeholder="Nome" [(ngModel)]="nome" class="input" />
+    </div>
+    <div class="form-group">
+      <input type="text" placeholder="Cognome" [(ngModel)]="cognome" class="input" />
+    </div>
+    <div class="form-group">
+      <input type="email" placeholder="Email" [(ngModel)]="email" class="input" />
+    </div>
+    <div class="form-group">
+      <input type="password" placeholder="Password" [(ngModel)]="password" class="input" />
+    </div>
+    <button (click)="register()" class="btn" [disabled]="loading">
+      {{ loading ? 'Caricamento...' : 'Registrati' }}
+    </button>
+    <p class="link">Hai già un account? <a routerLink="/login">Accedi</a></p>
+    <p class="error" *ngIf="error">{{ error }}</p>
+    <p class="success" *ngIf="success">{{ success }}</p>
+  </div>
+</div>

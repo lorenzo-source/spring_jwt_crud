@@ -1,1 +1,84 @@
-<p>user-list works!</p>
+<div class="container">
+  <div class="header">
+    <h1>Gestione Utenti</h1>
+    <a routerLink="/dashboard" class="btn-back">← Dashboard</a>
+  </div>
+
+  <div class="add-form">
+    <h3>Aggiungi Utente</h3>
+    <div class="form-row">
+      <input type="text" placeholder="Nome" [(ngModel)]="newUser.nome" class="input" />
+      <input type="text" placeholder="Cognome" [(ngModel)]="newUser.cognome" class="input" />
+      <input type="email" placeholder="Email" [(ngModel)]="newUser.email" class="input" />
+      <input type="password" placeholder="Password" [(ngModel)]="newUser.password" class="input" />
+      <button (click)="createUser()" class="btn">Aggiungi</button>
+    </div>
+    <p class="error" *ngIf="error">{{ error }}</p>
+    <p class="success" *ngIf="success">{{ success }}</p>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Cognome</th>
+        <th>Email</th>
+        <th>Creato il</th>
+        <th>Ultimo login</th>
+        <th>Azioni</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of users">
+        <td>
+          <span *ngIf="editingId !== user.id">{{ user.nome || '—' }}</span>
+          <input *ngIf="editingId === user.id" [(ngModel)]="editUser.nome" class="input-small" />
+        </td>
+        <td>
+          <span *ngIf="editingId !== user.id">{{ user.cognome || '—' }}</span>
+          <input *ngIf="editingId === user.id" [(ngModel)]="editUser.cognome" class="input-small" />
+        </td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.dataCreazione | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>
+          {{ user.dataUltimoLogin ? (user.dataUltimoLogin | date: 'dd/MM/yyyy HH:mm') : '—' }}
+        </td>
+        <td>
+          <button *ngIf="editingId !== user.id" (click)="startEdit(user)" class="btn-edit">
+            Modifica
+          </button>
+          <button *ngIf="editingId === user.id" (click)="saveEdit()" class="btn-save">Salva</button>
+          <button *ngIf="editingId === user.id" (click)="cancelEdit()" class="btn-cancel">
+            Annulla
+          </button>
+          <button (click)="deleteUser(user.id!)" class="btn-delete">Elimina</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 style="color: #1a3a5c; margin-top: 40px">Utenti Eliminati</h2>
+  <table class="table" *ngIf="deletedUsers.length > 0">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Cognome</th>
+        <th>Email</th>
+        <th>Creato il</th>
+        <th>Eliminato il</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of deletedUsers">
+        <td>{{ user.nome || '—' }}</td>
+        <td>{{ user.cognome || '—' }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.dataCreazione | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td style="color: #e74c3c">{{ user.dataCancellazione | date: 'dd/MM/yyyy HH:mm' }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <p *ngIf="deletedUsers.length === 0" class="empty">Nessun utente eliminato.</p>
+
+  <p *ngIf="users.length === 0" class="empty">Nessun utente trovato.</p>
+</div>
